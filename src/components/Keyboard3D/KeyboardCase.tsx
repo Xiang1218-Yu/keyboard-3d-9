@@ -1,31 +1,32 @@
-import { useRef, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
 import { RoundedBox } from '@react-three/drei';
-import * as THREE from 'three';
-import { useCaseMaterial, useLayout } from '@/store/useKeyboardStore';
+import { ThreeEvent } from '@react-three/fiber';
+import { useCaseMaterial, useLayout, useKeyboardStore } from '@/store/useKeyboardStore';
 import { MATERIAL_CONFIGS } from '@/data/materials';
 import { LAYOUT_CONFIGS } from '@/data/layouts';
 
-export function KeyboardCase() {
-  const meshRef = useRef<THREE.Mesh>(null);
+interface KeyboardCaseProps {
+  highlighted: boolean;
+}
+
+export function KeyboardCase({ highlighted }: KeyboardCaseProps) {
   const materialId = useCaseMaterial();
   const layout = useLayout();
+  const setSelectedLayer = useKeyboardStore((state) => state.setSelectedLayer);
   const materialConfig = MATERIAL_CONFIGS[materialId];
   const layoutConfig = LAYOUT_CONFIGS[layout];
 
-  const caseWidth = useMemo(() => layoutConfig.width + 0.8, [layoutConfig.width]);
-  const caseDepth = useMemo(() => layoutConfig.height + 0.8, [layoutConfig.height]);
+  const caseWidth = layoutConfig.width + 0.8;
+  const caseDepth = layoutConfig.height + 0.8;
 
-  useFrame((state) => {
-    if (meshRef.current) {
-      meshRef.current.rotation.x = Math.sin(state.clock.elapsedTime * 0.3) * 0.005;
-    }
-  });
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    if (e.delta > 6) return; // 拖拽旋转视角时不触发选中
+    e.stopPropagation();
+    setSelectedLayer('case');
+  };
 
   return (
-    <group position={[0, 0, 0]}>
+    <group onClick={handleClick}>
       <RoundedBox
-        ref={meshRef}
         args={[caseWidth, 0.6, caseDepth]}
         radius={0.15}
         smoothness={8}
@@ -37,6 +38,8 @@ export function KeyboardCase() {
           color={materialConfig.color}
           roughness={materialConfig.roughness}
           metalness={materialConfig.metalness}
+          emissive={highlighted ? '#6366f1' : '#000000'}
+          emissiveIntensity={highlighted ? 0.35 : 0}
         />
       </RoundedBox>
 
@@ -46,15 +49,8 @@ export function KeyboardCase() {
           color="#1e293b"
           roughness={0.9}
           metalness={0.1}
-        />
-      </mesh>
-
-      <mesh position={[0, -0.5, 0]} rotation={[-Math.PI / 2, 0, 0]} receiveShadow>
-        <planeGeometry args={[caseWidth + 8, caseDepth + 8]} />
-        <meshStandardMaterial
-          color="#0a0a0f"
-          roughness={1}
-          metalness={0}
+          emissive={highlighted ? '#6366f1' : '#000000'}
+          emissiveIntensity={highlighted ? 0.2 : 0}
         />
       </mesh>
     </group>

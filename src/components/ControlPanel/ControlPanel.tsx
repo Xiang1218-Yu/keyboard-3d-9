@@ -1,5 +1,6 @@
 import { Keyboard, Info, Mouse, MousePointer2 } from 'lucide-react';
 import { useState } from 'react';
+import { LayerExplorer } from './LayerExplorer';
 import { LayoutSelector } from './LayoutSelector';
 import { MaterialSelector } from './MaterialSelector';
 import { ZoneColorPicker } from './ZoneColorPicker';
@@ -39,6 +40,8 @@ export function ControlPanel({ selectedZone, onZoneChange }: ControlPanelProps) 
       </div>
 
       <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        <LayerExplorer />
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
         <LayoutSelector />
         <div className="w-full h-px bg-gradient-to-r from-transparent via-gray-700/50 to-transparent" />
         <MaterialSelector />

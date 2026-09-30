@@ -1,5 +1,7 @@
 export type LayoutType = '60%' | '65%' | '75%' | 'TKL' | 'Full';
 
+export type LayerId = 'keycaps' | 'switches' | 'plate' | 'pcb' | 'case';
+
 export type KeyZone = 
   | 'alphanumeric'
   | 'function'
@@ -52,6 +54,8 @@ export interface KeyboardState {
   caseMaterial: CaseMaterial;
   zoneColors: Record<KeyZone, string>;
   pressedKeys: Set<string>;
+  explodeAmount: number;
+  selectedLayer: LayerId | null;
 }
 
 export interface KeyboardActions {
@@ -61,4 +65,7 @@ export interface KeyboardActions {
   pressKey: (keyId: string) => void;
   releaseKey: (keyId: string) => void;
   resetColors: () => void;
+  setExplodeAmount: (amount: number) => void;
+  setSelectedLayer: (layer: LayerId | null) => void;
+  collapseLayers: () => void;
 }

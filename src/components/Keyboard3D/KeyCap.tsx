@@ -1,5 +1,5 @@
 import { useRef, useState, useMemo } from 'react';
-import { useFrame } from '@react-three/fiber';
+import { useFrame, ThreeEvent } from '@react-three/fiber';
 import { RoundedBox, Text } from '@react-three/drei';
 import * as THREE from 'three';
 import { KeyConfig } from '@/types/keyboard';
@@ -9,9 +9,10 @@ import { useZoneColors } from '@/store/useKeyboardStore';
 interface KeyCapProps {
   keyConfig: KeyConfig;
   selectedZone?: string | null;
+  layerSelected?: boolean;
 }
 
-export function KeyCap({ keyConfig, selectedZone }: KeyCapProps) {
+export function KeyCap({ keyConfig, selectedZone, layerSelected }: KeyCapProps) {
   const meshRef = useRef<THREE.Mesh>(null);
   const [hovered, setHovered] = useState(false);
   const isPressed = useIsKeyPressed(keyConfig.id);
@@ -50,12 +51,12 @@ export function KeyCap({ keyConfig, selectedZone }: KeyCapProps) {
     }
   });
 
-  const handlePointerDown = (e: any) => {
+  const handlePointerDown = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     pressKey(keyConfig.id);
   };
 
-  const handlePointerUp = (e: any) => {
+  const handlePointerUp = (e: ThreeEvent<MouseEvent>) => {
     e.stopPropagation();
     releaseKey(keyConfig.id);
   };
@@ -67,8 +68,14 @@ export function KeyCap({ keyConfig, selectedZone }: KeyCapProps) {
     }
   };
 
-  const emissiveIntensity = hovered || isSelected ? 0.3 : isPressed ? 0.5 : 0.1;
-  const emissiveColor = isPressed ? '#ffffff' : hovered ? '#6366f1' : isSelected ? '#8b5cf6' : '#000000';
+  // 拦截 click 事件，避免穿透到轴体/定位板等下层网格，
+  // 保证键帽的按压交互不会被层选择逻辑吞掉
+  const handleClick = (e: ThreeEvent<MouseEvent>) => {
+    e.stopPropagation();
+  };
+
+  const emissiveIntensity = isPressed ? 0.5 : hovered || isSelected ? 0.3 : layerSelected ? 0.35 : 0.1;
+  const emissiveColor = isPressed ? '#ffffff' : hovered ? '#6366f1' : isSelected ? '#8b5cf6' : layerSelected ? '#818cf8' : '#000000';
 
   const fontSize = keyConfig.width > 1.5 ? 0.28 : keyConfig.width > 1 ? 0.32 : 0.38;
 
@@ -83,6 +90,7 @@ export function KeyCap({ keyConfig, selectedZone }: KeyCapProps) {
         onPointerUp={handlePointerUp}
         onPointerOut={handlePointerOut}
         onPointerOver={() => setHovered(true)}
+        onClick={handleClick}
         castShadow
         receiveShadow
       >
