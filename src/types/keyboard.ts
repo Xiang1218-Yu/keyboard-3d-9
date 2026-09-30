@@ -10,6 +10,22 @@ export type KeyZone =
 
 export type CaseMaterial = 'aluminum' | 'plastic' | 'wood' | 'carbon';
 
+/** 爆炸拆解五层，顺序自下而上 */
+export type LayerId = 'case' | 'pcb' | 'plate' | 'switch' | 'keycap';
+
+export interface LayerConfig {
+  id: LayerId;
+  name: string;
+  shortName: string;
+  description: string;
+  details: string[];
+  /** 该层在整机中的基准高度（Y 坐标） */
+  baseY: number;
+  /** 爆炸时相对基准高度额外抬升的层间距倍数基数 */
+  order: number;
+  color: string;
+}
+
 export interface KeyConfig {
   id: string;
   label: string;
@@ -52,6 +68,10 @@ export interface KeyboardState {
   caseMaterial: CaseMaterial;
   zoneColors: Record<KeyZone, string>;
   pressedKeys: Set<string>;
+  /** 爆炸程度 0~1（0 = 整机装配，1 = 完全分层） */
+  explosion: number;
+  /** 当前高亮选中的结构层，null = 未选中 */
+  selectedLayer: LayerId | null;
 }
 
 export interface KeyboardActions {
@@ -61,4 +81,6 @@ export interface KeyboardActions {
   pressKey: (keyId: string) => void;
   releaseKey: (keyId: string) => void;
   resetColors: () => void;
+  setExplosion: (value: number) => void;
+  setSelectedLayer: (layer: LayerId | null) => void;
 }
